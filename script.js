@@ -14,8 +14,7 @@ const karats = [
 
 const goldPriceEl = document.getElementById("goldPrice");
 const codeEl = document.getElementById("codeInput");
-const fetchBtn = document.getElementById("fetchBtn");
-const calcBtn = document.getElementById("calcBtn");
+const precioBtn = document.getElementById("precioBtn");
 const shareBtn = document.getElementById("shareBtn");
 
 const priceListEl = document.getElementById("priceList");
@@ -23,9 +22,14 @@ const hintEl = document.getElementById("hint");
 const refDisplayEl = document.getElementById("refDisplay");
 const priceCard = document.getElementById("priceCard");
 
-fetchBtn.addEventListener("click", fetchPrice);
-calcBtn.addEventListener("click", updateList);
+precioBtn.addEventListener("click", handlePrecio);
 shareBtn.addEventListener("click", shareImage);
+
+// ONE BUTTON FLOW
+async function handlePrecio() {
+    await fetchPrice();
+    updateList();
+}
 
 // SAME API AS YOUR FIRST SITE
 async function fetchPrice() {
@@ -43,7 +47,7 @@ function updateList() {
     const code = parseInt(codeEl.value, 10);
 
     if (!oz || oz <= 0) {
-        showHint("Enter a valid gold price or tap Fetch.");
+        showHint("Unable to fetch gold price. Try again.");
         return;
     }
 
@@ -52,7 +56,6 @@ function updateList() {
         return;
     }
 
-    // Code → discount
     const discount = code + 30; // 60→90%, 70→100%
     const pct = discount / 100;
 
@@ -67,7 +70,6 @@ function updateList() {
         priceListEl.appendChild(row);
     });
 
-    // Internal reference
     refDisplayEl.textContent = `Ref#9${Math.floor(oz)}${code}`;
 
     hintEl.classList.add("hidden");
