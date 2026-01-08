@@ -12,96 +12,49 @@ const karats = [
     { label: "99%", purity: 0.99 }
 ];
 
-// Internal gold price (never shown)
-let goldPriceValue = null;
-
-const codeEl = document.getElementById("codeInput");
-const precioBtn = document.getElementById("precioBtn");
-const shareBtn = document.getElementById("shareBtn");
-
 const priceListEl = document.getElementById("priceList");
-const hintEl = document.getElementById("hint");
 const refDisplayEl = document.getElementById("refDisplay");
+const shareBtn = document.getElementById("shareBtn");
 const priceCard = document.getElementById("priceCard");
 
-precioBtn.addEventListener("click", handlePrecio);
 shareBtn.addEventListener("click", shareImage);
 
-// 🔗 AUTO-RUN FROM LINK (?c=62)
+// 🔐 READ & DECODE OBFUSCATED CODE (?r=1062)
 const params = new URLSearchParams(window.location.search);
-const urlCode = params.get("c");
+const raw = params.get("r");
 
-if (urlCode) {
-    codeEl.value = urlCode;
-
-    // Auto-run after short delay (DOM + API ready)
-    setTimeout(() => {
-        handlePrecio();
-    }, 400);
+if (raw) {
+    const code = parseInt(raw, 10) - 1000;
+    if (code >= 60 && code <= 70) {
+        loadPrices(code);
+    }
 }
 
-// ONE BUTTON FLOW
-async function handlePrecio() {
-    await fetchPrice();
-    updateList();
-}
-
-// SAME API AS ORIGINAL SITE
-async function fetchPrice() {
+async function loadPrices(code) {
     try {
         const res = await fetch("https://api.gold-api.com/price/XAU");
         const data = await res.json();
-        goldPriceValue = data.price;
+
+        const oz = data.price;
+        const discount = code + 30;
+        const pct = discount / 100;
+        const gramBase = oz / 31.1035;
+
+        priceListEl.innerHTML = "";
+
+        karats.forEach(k => {
+            const perGram = (gramBase * k.purity * pct).toFixed(2);
+            const row = document.createElement("div");
+            row.className = "row";
+            row.innerHTML = `<span>${k.label}</span><span>$${perGram}</span>`;
+            priceListEl.appendChild(row);
+        });
+
+        refDisplayEl.textContent = `Ref#9${Math.floor(oz)}${code}`;
+
     } catch (e) {
-        console.log("fetch error", e);
+        console.log("price load error", e);
     }
-}
-
-function updateList() {
-    const oz = goldPriceValue;
-    const code = parseInt(codeEl.value, 10);
-
-    if (!oz || oz <= 0) {
-        showHint("Unable to retrieve gold price. Try again.");
-        return;
-    }
-
-    if (!Number.isInteger(code) || code < 60 || code > 70) {
-        showHint("Invalid code.");
-        return;
-    }
-
-    // Code → discount
-    // 60 → 90%, 70 → 100%
-    const discount = code + 30;
-    const pct = discount / 100;
-
-    priceListEl.innerHTML = "";
-    const gramBase = oz / 31.1035;
-
-    karats.forEach(k => {
-        const perGram = (gramBase * k.purity * pct).toFixed(2);
-        const row = document.createElement("div");
-        row.className = "row";
-        row.innerHTML = `<span>${k.label}</span><span>$${perGram}</span>`;
-        priceListEl.appendChild(row);
-    });
-
-    // Internal reference (meaningless to clients)
-    refDisplayEl.textContent = `Ref#9${Math.floor(oz)}${code}`;
-
-    hintEl.classList.add("hidden");
-    priceListEl.classList.remove("hidden");
-    refDisplayEl.classList.remove("hidden");
-    shareBtn.classList.remove("hidden");
-}
-
-function showHint(msg) {
-    hintEl.innerHTML = msg;
-    hintEl.classList.remove("hidden");
-    priceListEl.classList.add("hidden");
-    refDisplayEl.classList.add("hidden");
-    shareBtn.classList.add("hidden");
 }
 
 async function shareImage() {
