@@ -1,41 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gold Prices</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-</head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Gold Prices</title>
 
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
 <body>
-  <div class="wrapper">
+
+<div class="wrapper">
     <h1>Gold Prices</h1>
 
     <div class="card">
-      <!-- Gold price input is hidden but still used -->
-      <input type="hidden" id="goldPrice" />
+        <label>Gold Price / oz</label>
+        <input type="number" id="goldPrice" step="0.01" placeholder="Fetch or enter manually">
 
-      <label>Code</label>
-      <input type="number" id="codeInput" placeholder="Enter code" />
+        <label>Code (60–70)</label>
+        <input type="number" id="codeInput" placeholder="Enter code">
 
-      <div class="btn-row">
-        <button id="calcBtn">Precio</button>
-      </div>
+        <div class="btn-row">
+            <button id="fetchBtn">Fetch Price</button>
+            <button id="calcBtn">Get Prices</button>
+        </div>
     </div>
 
     <div class="card" id="priceCard">
-      <div id="hint" class="hint">
-        Enter your code and tap <b>Precio</b>.
-      </div>
+        <div id="hint">
+            Enter a valid code (60–70) and tap <b>Get Prices</b>.
+        </div>
 
-      <div id="priceList" class="hidden"></div>
-      <div id="refDisplay" class="refRow hidden"></div>
+        <div id="priceList" class="hidden"></div>
 
-      <button id="shareBtn" class="shareBtn hidden" type="button">Share</button>
+        <div id="refDisplay" class="refRow hidden"></div>
+
+        <button id="shareBtn" class="hidden">Share</button>
     </div>
-  </div>
+</div>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
