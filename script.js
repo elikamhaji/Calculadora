@@ -12,7 +12,9 @@ const karats = [
     { label: "99%", purity: 0.99 }
 ];
 
-const goldPriceEl = document.getElementById("goldPrice");
+// Internal gold price (hidden from UI)
+let goldPriceValue = null;
+
 const codeEl = document.getElementById("codeInput");
 const precioBtn = document.getElementById("precioBtn");
 const shareBtn = document.getElementById("shareBtn");
@@ -25,29 +27,29 @@ const priceCard = document.getElementById("priceCard");
 precioBtn.addEventListener("click", handlePrecio);
 shareBtn.addEventListener("click", shareImage);
 
-// ONE BUTTON FLOW
+// ONE BUTTON FLOW: fetch price + calculate
 async function handlePrecio() {
     await fetchPrice();
     updateList();
 }
 
-// SAME API AS YOUR FIRST SITE
+// SAME API AS YOUR ORIGINAL SITE
 async function fetchPrice() {
     try {
         const res = await fetch("https://api.gold-api.com/price/XAU");
         const data = await res.json();
-        goldPriceEl.value = data.price.toFixed(2);
+        goldPriceValue = data.price;
     } catch (e) {
         console.log("fetch error", e);
     }
 }
 
 function updateList() {
-    const oz = parseFloat(goldPriceEl.value);
+    const oz = goldPriceValue;
     const code = parseInt(codeEl.value, 10);
 
     if (!oz || oz <= 0) {
-        showHint("Unable to fetch gold price. Try again.");
+        showHint("Unable to retrieve gold price. Try again.");
         return;
     }
 
@@ -56,7 +58,9 @@ function updateList() {
         return;
     }
 
-    const discount = code + 30; // 60→90%, 70→100%
+    // Code → discount mapping
+    // 60 → 90%, 70 → 100%
+    const discount = code + 30;
     const pct = discount / 100;
 
     priceListEl.innerHTML = "";
@@ -70,6 +74,7 @@ function updateList() {
         priceListEl.appendChild(row);
     });
 
+    // Internal reference (visible but meaningless to clients)
     refDisplayEl.textContent = `Ref#9${Math.floor(oz)}${code}`;
 
     hintEl.classList.add("hidden");
