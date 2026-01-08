@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Gold Prices</title>
+    <title></title>
 
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -12,27 +12,12 @@
 
 <div class="wrapper">
 
-    <div class="card">
-     
-
-        <label>Codigo</label>
-        <input type="number" id="codeInput" placeholder="Enter code">
-
-        <div class="btn-row">
-            <button id="precioBtn">Precio</button>
-        </div>
-    </div>
-
     <div class="card" id="priceCard">
-        <div id="hint">
-            Enter a valid code (60–70) and tap <b>Precio</b>.
-        </div>
-
-        <div id="priceList" class="hidden"></div>
-        <div id="refDisplay" class="refRow hidden"></div>
-
-        <button id="shareBtn" class="hidden">Share</button>
+        <div id="priceList"></div>
+        <div id="refDisplay" class="refRow"></div>
+        <button id="shareBtn">Share</button>
     </div>
+
 </div>
 
 <script src="script.js"></script>
