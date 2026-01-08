@@ -1,95 +1,104 @@
-body {
-    margin: 0;
-    background: #0c0c0c;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    color: white;
+const karats = [
+    { label: "10k", purity: 0.41 },
+    { label: "14k", purity: 0.575 },
+    { label: "18k", purity: 0.735 },
+    { label: "87%", purity: 0.87 },
+    { label: "88%", purity: 0.88 },
+    { label: "90%", purity: 0.90 },
+    { label: "91%", purity: 0.91 },
+    { label: "92%", purity: 0.92 },
+    { label: "93%", purity: 0.93 },
+    { label: "95%", purity: 0.95 },
+    { label: "99%", purity: 0.99 }
+];
+
+const goldPriceEl = document.getElementById("goldPrice");
+const codeEl = document.getElementById("codeInput");
+const fetchBtn = document.getElementById("fetchBtn");
+const calcBtn = document.getElementById("calcBtn");
+const shareBtn = document.getElementById("shareBtn");
+
+const priceListEl = document.getElementById("priceList");
+const hintEl = document.getElementById("hint");
+const refDisplayEl = document.getElementById("refDisplay");
+const priceCard = document.getElementById("priceCard");
+
+fetchBtn.addEventListener("click", fetchPrice);
+calcBtn.addEventListener("click", updateList);
+shareBtn.addEventListener("click", shareImage);
+
+// SAME API AS YOUR FIRST SITE
+async function fetchPrice() {
+    try {
+        const res = await fetch("https://api.gold-api.com/price/XAU");
+        const data = await res.json();
+        goldPriceEl.value = data.price.toFixed(2);
+    } catch (e) {
+        console.log("fetch error", e);
+    }
 }
 
-.wrapper {
-    max-width: 430px;
-    margin: auto;
-    padding: 20px;
+function updateList() {
+    const oz = parseFloat(goldPriceEl.value);
+    const code = parseInt(codeEl.value, 10);
+
+    if (!oz || oz <= 0) {
+        showHint("Enter a valid gold price or tap Fetch.");
+        return;
+    }
+
+    if (!Number.isInteger(code) || code < 60 || code > 70) {
+        showHint("Code must be between 60 and 70.");
+        return;
+    }
+
+    // Code → discount
+    const discount = code + 30; // 60→90%, 70→100%
+    const pct = discount / 100;
+
+    priceListEl.innerHTML = "";
+    const gramBase = oz / 31.1035;
+
+    karats.forEach(k => {
+        const perGram = (gramBase * k.purity * pct).toFixed(2);
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `<span>${k.label}</span><span>$${perGram}</span>`;
+        priceListEl.appendChild(row);
+    });
+
+    // Internal reference
+    refDisplayEl.textContent = `Ref#9${Math.floor(oz)}${code}`;
+
+    hintEl.classList.add("hidden");
+    priceListEl.classList.remove("hidden");
+    refDisplayEl.classList.remove("hidden");
+    shareBtn.classList.remove("hidden");
 }
 
-h1 {
-    font-weight: 600;
-    margin-bottom: 20px;
+function showHint(msg) {
+    hintEl.innerHTML = msg;
+    hintEl.classList.remove("hidden");
+    priceListEl.classList.add("hidden");
+    refDisplayEl.classList.add("hidden");
+    shareBtn.classList.add("hidden");
 }
 
-.card {
-    background: #141414;
-    padding: 22px;
-    border-radius: 26px;
-    box-shadow: 0 0 45px rgba(0,0,0,0.4);
-    margin-bottom: 22px;
-}
+async function shareImage() {
+    const canvas = await html2canvas(priceCard, { scale: 3 });
 
-label {
-    font-size: 15px;
-    opacity: 0.9;
-}
+    canvas.toBlob(blob => {
+        if (!blob) return;
 
-input {
-    width: 100%;
-    margin: 10px 0 18px;
-    padding: 14px;
-    border: none;
-    border-radius: 18px;
-    background: #1e1e1e;
-    color: white;
-    font-size: 17px;
-}
+        const file = new File([blob], "gold-prices.png", { type: "image/png" });
 
-.btn-row {
-    display: flex;
-    gap: 10px;
-}
-
-button {
-    flex: 1;
-    padding: 14px;
-    border: none;
-    border-radius: 18px;
-    background: #2d4f81;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-button:active {
-    transform: translateY(1px);
-}
-
-#hint {
-    opacity: 0.8;
-    font-size: 15px;
-}
-
-.row {
-    display: flex;
-    justify-content: space-between;
-    padding: 14px 4px;
-    font-size: 18px;
-    border-bottom: 1px solid #2a2a2a;
-}
-
-.row:last-child {
-    border-bottom: none;
-}
-
-.hidden {
-    display: none;
-}
-
-.refRow {
-    margin-top: 10px;
-    font-size: 13px;
-    opacity: 0.55;
-    text-align: left;
-}
-
-#shareBtn {
-    margin-top: 16px;
-    width: 100%;
-    background: #1f6a3a;
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({ files: [file] });
+        } else {
+            const link = document.createElement("a");
+            link.href = canvas.toDataURL("image/png");
+            link.download = "gold-prices.png";
+            link.click();
+        }
+    });
 }
