@@ -12,7 +12,7 @@ const karats = [
     { label: "99%", purity: 0.99 }
 ];
 
-// Internal gold price (hidden from UI)
+// Internal gold price (never shown)
 let goldPriceValue = null;
 
 const codeEl = document.getElementById("codeInput");
@@ -27,13 +27,26 @@ const priceCard = document.getElementById("priceCard");
 precioBtn.addEventListener("click", handlePrecio);
 shareBtn.addEventListener("click", shareImage);
 
-// ONE BUTTON FLOW: fetch price + calculate
+// 🔗 AUTO-RUN FROM LINK (?c=62)
+const params = new URLSearchParams(window.location.search);
+const urlCode = params.get("c");
+
+if (urlCode) {
+    codeEl.value = urlCode;
+
+    // Auto-run after short delay (DOM + API ready)
+    setTimeout(() => {
+        handlePrecio();
+    }, 400);
+}
+
+// ONE BUTTON FLOW
 async function handlePrecio() {
     await fetchPrice();
     updateList();
 }
 
-// SAME API AS YOUR ORIGINAL SITE
+// SAME API AS ORIGINAL SITE
 async function fetchPrice() {
     try {
         const res = await fetch("https://api.gold-api.com/price/XAU");
@@ -54,11 +67,11 @@ function updateList() {
     }
 
     if (!Number.isInteger(code) || code < 60 || code > 70) {
-        showHint("Code must be between 60 and 70.");
+        showHint("Invalid code.");
         return;
     }
 
-    // Code → discount mapping
+    // Code → discount
     // 60 → 90%, 70 → 100%
     const discount = code + 30;
     const pct = discount / 100;
@@ -74,7 +87,7 @@ function updateList() {
         priceListEl.appendChild(row);
     });
 
-    // Internal reference (visible but meaningless to clients)
+    // Internal reference (meaningless to clients)
     refDisplayEl.textContent = `Ref#9${Math.floor(oz)}${code}`;
 
     hintEl.classList.add("hidden");
