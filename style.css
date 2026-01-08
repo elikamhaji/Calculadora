@@ -42,11 +42,10 @@ input {
 
 .btn-row {
     display: flex;
-    gap: 10px;
 }
 
 button {
-    flex: 1;
+    width: 100%;
     padding: 14px;
     border: none;
     border-radius: 18px;
@@ -90,6 +89,5 @@ button:active {
 
 #shareBtn {
     margin-top: 16px;
-    width: 100%;
     background: #1f6a3a;
 }
